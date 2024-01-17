@@ -1,0 +1,82 @@
+{
+	"name": "Dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Parquet2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquet1",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "split1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          RideId as string,",
+				"          VendorId as string,",
+				"          PickupTime as string,",
+				"          DropTime as string,",
+				"          PickupLocationId as string,",
+				"          DropLocationId as string,",
+				"          CabNumber as string,",
+				"          DriverLicenseNumber as string,",
+				"          PassengerCount as integer,",
+				"          TripDistance as integer,",
+				"          RateCodeId as string,",
+				"          PaymentType as string,",
+				"          TotalAmount as string,",
+				"          FareAmount as string,",
+				"          Extra as string,",
+				"          MtaTax as string,",
+				"          TipAmount as string,",
+				"          TollsAmount as string,",
+				"          ImprovementSurcharge as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 split(PassengerCount<1,",
+				"     disjoint: false) ~> split1@(passengersLow, pssengerHigh)",
+				"split1@passengersLow sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"split1@pssengerHigh sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
+			]
+		}
+	}
+}
